@@ -102,7 +102,7 @@ export default function UserInterface() {
 
   return (
     <main className="page">
-      <section className="shell">
+      <section className={`shell ${phase === "lost" ? " is-shaking" : ""}`}>
         {/* Title, how to play, and which phase we are in */}
         <header className="shell-header">
           <div className="title-block">
@@ -186,14 +186,13 @@ export default function UserInterface() {
               onUncover={handleUncover}
               onFlag={handleFlag}
             />
+            {phase === "lost" && (
+                <div className="explosion-overlay" aria-hidden="true" />
+            )}
           </div>
         </section>
 
-        <div className="shell-floor" aria-hidden="true">
-          {Array.from({ length: 24 }, (_, index) => (
-            <span key={index} />
-          ))}
-        </div>
+        
       </section>
     </main>
   );
