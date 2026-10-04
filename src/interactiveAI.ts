@@ -37,78 +37,51 @@ function aiSolverMedium(gameState : GameState) {
     for (let row = 0; row < BOARD_SIZE; row++){
         for (let col = 0; col < BOARD_SIZE; col++){
             const cell = gameState.board[row]![col]!;
+            const pos: Position = {row: row, column: col};
 
-            const coveredCellsPosition: Array<Position> = [];
-            const flaggedCellsPosition: Array<Position> = [];
+            // get neighbors' positions
+            const neighborsPositions = getNeighbors(pos);
 
-            if (cell.visibility === "revealed" && !cell.hasMine){
-                for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
-                    for (let colOffset = -1; colOffset <= 1; colOffset++) {
-                        // skips the check covered cell at (row, col)
-                        if (rowOffset === 0 && colOffset === 0) {
-                            continue;
-                        }
+            // map the neighbors' positions back to the corresponding cell
+            const neighbors = neighborsPositions.map(p => ({
+                pos: p,
+                cell: gameState.board[p.row]![p.column]!
+            }));
 
-                        const neighborRow = row + rowOffset;
-                        const neighborCol = col + colOffset;
+            // filter for covered and flagged neighbor cells
+            const covered = neighbors.filter(n => n.cell.visibility === "covered");
+            const flagged = neighbors.filter(n => n.cell.visibility === "flagged");
 
-                        // bounds check: skip out of range coordinates
-                        if (neighborRow < 0 || neighborRow >= BOARD_SIZE || 
-                            neighborCol < 0 || neighborCol >= BOARD_SIZE) {
-                            continue;
-                        }
+            if (covered.length === 0){
+                continue;
+            }
 
-                        const neighborCell = gameState.board[neighborRow]![neighborCol]!;
-
-                        if (neighborCell.visibility === "covered"){
-                            const pos: Position = {row: neighborRow, column: neighborCol};
-                            coveredCellsPosition.push(pos);
-                        }
-                        else if (neighborCell.visibility === "flagged"){
-                            const pos: Position = {row: neighborRow, column: neighborCol};
-                            flaggedCellsPosition.push(pos);
-                        }
+            // Scenario 1: all neighbor covered cells are mines so flag them
+            if (cell.adjacentMines === covered.length + flagged.length){
+                for (const { pos } of covered){
+                    const result = toggleFlag(gameState, pos);
+                    if (result.ok && result.changed){
+                        gameState = result.state;
                     }
                 }
-            
-                if (coveredCellsPosition.length > 0 && cell.adjacentMines === coveredCellsPosition.length + flaggedCellsPosition.length) {
-                    for (let posIdx = 0; posIdx < coveredCellsPosition.length; posIdx++){
-                        const result = toggleFlag(gameState, coveredCellsPosition[posIdx]!);
+                return gameState;
+            }
 
-                        if (result.ok && result.changed){
-                            gameState = result.state;
-                        }
+            // Scenario 2: all mines are flagged so safe to uncover remaining covered neighbor cells
+            if (flagged.length === cell.adjacentMines) {
+                for (const { pos } of covered) {
+                    const result = uncover(gameState, pos);
+                    if (result.ok && result.changed) {
+                        gameState = result.state;
                     }
-
-                    return gameState;
                 }
-                else if (coveredCellsPosition.length > 0 && flaggedCellsPosition.length === cell.adjacentMines) {
-                    for (let posIdx = 0; posIdx < coveredCellsPosition.length; posIdx++) {
-                        const result = uncover(gameState, coveredCellsPosition[posIdx]!);
-                        if (result.ok && result.changed) {
-                            gameState = result.state;
-                        }
-                    }
-                    return gameState;
-                }
+                return gameState;
             }
         }
     }
 
-    while(true){
-        const row = Math.floor(Math.random() * BOARD_SIZE);
-        const col = Math.floor(Math.random() * BOARD_SIZE);
-
-        const cell = gameState.board[row]?.[col];
-
-        if (cell?.visibility === "covered") {
-            const result = uncover(gameState, { row, column: col });
-
-            if (result.ok && result.changed){
-                return result.state;
-            }
-        }
-    }
+    // call aiSolverEasy as a fallback
+    return aiSolverEasy(gameState);
 }
 
 // TODO: remove later (solely here for testing purposes)
