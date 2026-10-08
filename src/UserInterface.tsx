@@ -12,6 +12,9 @@ import SetupControls from "./components/SetupControls";
 import { processFlagInput, processSetupInput, processUncoverInput } from "./inputHandler";
 import { BOARD_SIZE, type GameState, type Position } from "./types";
 
+// Explosion sound effect; built once here so it is not recreated on every render.
+const boomSound = new Audio("/vineBoom.mp3");
+
 const PHASES = ["setup", "playing", "won", "lost"] as const;
 
 type Phase = (typeof PHASES)[number];
@@ -81,7 +84,11 @@ export default function UserInterface() {
 
     setError("");
     setGameState(result.state);
-    if (result.state.status === "lost") setDetonated(position);
+    if (result.state.status === "lost") {
+      setDetonated(position);
+      boomSound.currentTime = 0;
+      boomSound.play().catch(() => {});
+    }
   }
 
   function handleFlag(position: Position) {
