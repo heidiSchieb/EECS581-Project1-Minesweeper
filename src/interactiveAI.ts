@@ -28,7 +28,7 @@ function aiSolverEasy(gameState : GameState) {
     }
 }
 
-function aiSolverMedium(gameState : GameState) {
+function aiSolverMedium(gameState : GameState, useFallback = true) {
     if (gameState.status !== "playing") {
         return gameState;
     }
@@ -61,6 +61,7 @@ function aiSolverMedium(gameState : GameState) {
 
             // Scenario 1: all neighbor covered cells are mines so flag them
             if (cell.adjacentMines === covered.length + flagged.length){
+                
                 for (const { pos } of covered){
                     const result = toggleFlag(gameState, pos);
                     if (result.ok && result.changed){
@@ -84,8 +85,12 @@ function aiSolverMedium(gameState : GameState) {
     }
 
     // call aiSolverEasy as a fallback
-    return aiSolverEasy(gameState);
-    //return gameState; //temp for ai solver hard will need to change 
+    if (useFallback) {
+        return aiSolverEasy(gameState);
+    }
+    // for the hard ai solver 
+    return gameState;
+     
 }
 
 function aiSolverHard(gameState: GameState) {
@@ -94,7 +99,7 @@ function aiSolverHard(gameState: GameState) {
     }
 
     //first chek the medium rules 
-    const mediumState = aiSolverMedium(gameState);
+    const mediumState = aiSolverMedium(gameState, false);
 
     // updates the game state if medium mode made a move 
     if (mediumState !== gameState) {
@@ -340,8 +345,8 @@ function create121TestState(): GameState {
 
     // Put mines at (4, 3) and (4, 5)
     // These create the 1-2-1 pattern above them.
-    board = updateCell(board, { row: 4, column: 3 }, { hasMine: true });
-    board = updateCell(board, { row: 4, column: 5 }, { hasMine: true });
+    board = updateCell(board, { row: 3, column: 4 }, { hasMine: true });
+    board = updateCell(board, { row: 5, column: 4 }, { hasMine: true });
 
     // Add 8 more mines far away from the pattern.
     const extraMines = [
@@ -371,13 +376,13 @@ function create121TestState(): GameState {
 
     board = updateCell(
         board,
-        { row: 3, column: 4 },
+        { row: 4, column: 3 },
         { visibility: "revealed" }
     );
 
     board = updateCell(
         board,
-        { row: 3, column: 5 },
+        { row: 5, column: 3 },
         { visibility: "revealed" }
     );
 
@@ -441,6 +446,7 @@ function main() {
   }
   */
 //TODO: remove later (solely here for testing purposes)
+
  function main() {
     let gameState = create121TestState();
 
