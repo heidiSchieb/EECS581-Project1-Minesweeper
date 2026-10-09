@@ -171,6 +171,15 @@ export default function UserInterface() {
             <button type="button" className="new-game" onClick={returnToSetup}>
               New Game
             </button>
+            {/* NEW: Start or stop automatic play. */}
+            <button
+              type="button"
+              className="new-game"
+              onClick={isRunning ? stopAuto : startAuto}
+              aria-pressed={isRunning}
+            >
+              {isRunning ? "Stop AI" : "Start Easy AI"}
+            </button>
           </div>
         ) : null}
 
