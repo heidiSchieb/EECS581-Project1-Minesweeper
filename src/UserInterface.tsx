@@ -203,6 +203,22 @@ export default function UserInterface() {
         <section className="stage" aria-label="Minesweeper board">
           <p className="stage-label">STAGE 01</p>
           <div className={`board-wrap${phase === "setup" ? " is-preview" : ""}`}>
+            <fieldset
+              disabled={isRunning}
+              aria-label="Minesweeper board controls"
+              style={{
+                border: 0,
+                margin: 0,
+                padding: 0,
+                minWidth: 0,
+              }}
+              onContextMenuCapture={(event) => {
+                if (isRunning) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }
+              }}
+            >
             <GameBoard
               board={board}
               disabled={phase !== "playing"}
@@ -210,6 +226,7 @@ export default function UserInterface() {
               onUncover={handleUncover}
               onFlag={handleFlag}
             />
+            </fieldset>
             {phase === "lost" && (
                 <div className="explosion-overlay" aria-hidden="true" />
             )}
