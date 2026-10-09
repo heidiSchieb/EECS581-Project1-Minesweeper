@@ -12,6 +12,8 @@ import SetupControls from "./components/SetupControls";
 import { processFlagInput, processSetupInput, processUncoverInput } from "./inputHandler";
 import { BOARD_SIZE, type GameState, type Position } from "./types";
 
+import { useAutoSolver } from "./useAutoSolver";
+
 // Explosion sound effect; built once here so it is not recreated on every render.
 const boomSound = new Audio("/vineBoom.mp3");
 
