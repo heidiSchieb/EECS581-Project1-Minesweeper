@@ -203,6 +203,7 @@ export default function UserInterface() {
         <section className="stage" aria-label="Minesweeper board">
           <p className="stage-label">STAGE 01</p>
           <div className={`board-wrap${phase === "setup" ? " is-preview" : ""}`}>
+            {/* NEW: Block manual board input while the AI runs. */}
             <fieldset
               disabled={isRunning}
               aria-label="Minesweeper board controls"
