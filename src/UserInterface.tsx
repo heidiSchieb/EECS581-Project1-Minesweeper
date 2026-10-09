@@ -52,6 +52,12 @@ export default function UserInterface() {
   const board = gameState?.board ?? previewBoard;
   const minesLeft = gameState ? gameState.mineCount - gameState.flagsPlaced : 0;
 
+  // Connect automatic play to the current game and uncover handler.
+  const { isRunning, startAuto, stopAuto } = useAutoSolver(
+    gameState,
+    handleUncover,
+  );
+
   // --- Talk to game logic through the input handler ---
   function returnToSetup() {
     setGameState(null);
