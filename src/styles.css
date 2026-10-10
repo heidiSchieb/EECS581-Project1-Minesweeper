@@ -409,7 +409,7 @@ h1 {
   inset: 0;
   z-index: 2;
   pointer-events: none;
-  background: url("../assets/boom.png") center / cover no-repeat;
+  background: url("/boom.png") center / cover no-repeat;
   animation: explosion-reveal 3s ease-out forwards;
 }
 

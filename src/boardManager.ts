@@ -114,22 +114,23 @@ export function calculateAdjacentMines(board: Board): Board {
 }
 
 /**
- * Guarantee that the cell the player opens first is not a mine.
- *
- * If the cursor sits on a mine, the mine is moved to another covered, mine-free cell so
- * the mine count never changes. The destination is drawn from the injected random source
- * instead of the first free cell in scan order: a fixed destination would make the
- * opening move predictable to an observant player, and injecting the source keeps the
- * choice reproducible for tests.
+ * Clear the first cell's surrounding area so its initial reveal opens a zero-region.
+ * Relocated mines are placed outside the area without changing the total mine count.
  */
-export function makeFirstCellSafe(
+export function makeFirstRevealAreaSafe(
   board: Board,
   position: Position,
   random: RandomSource = Math.random,
 ): Board {
-  const firstCell = getCell(board, position);
+  const safeArea = [position, ...getNeighbors(position)];
+  const safeAreaKeys = new Set(
+    safeArea.map(({ row, column }) => `${row}:${column}`),
+  );
+  const minesToRelocate = safeArea.filter((areaPosition) =>
+    getCell(board, areaPosition).hasMine,
+  );
 
-  if (!firstCell.hasMine) {
+  if (minesToRelocate.length === 0) {
     return board;
   }
 
@@ -140,50 +141,39 @@ export function makeFirstCellSafe(
       const candidate = getCell(board, { row, column });
 
       if (
+        !safeAreaKeys.has(`${row}:${column}`) &&
         !candidate.hasMine &&
-        candidate.visibility === "covered" &&
-        (row !== position.row || column !== position.column)
+        candidate.visibility === "covered"
       ) {
         candidates.push({ row, column });
       }
     }
   }
 
-  // A board with nowhere to move the mine is left untouched rather than corrupted.
-  if (candidates.length === 0) {
-    return board;
+  if (candidates.length < minesToRelocate.length) {
+    throw new RangeError("Not enough covered cells outside the first reveal area to relocate mines.");
   }
 
-  const sample = random();
-  if (!Number.isFinite(sample) || sample < 0 || sample >= 1) {
-    throw new RangeError("The random source must return a number in [0, 1).");
-  }
+  const relocatedPositions = new Set<string>();
+  for (const _mine of minesToRelocate) {
+    const sample = random();
+    if (!Number.isFinite(sample) || sample < 0 || sample >= 1) {
+      throw new RangeError("The random source must return a number in [0, 1).");
+    }
 
-  const newMinePosition = candidates[Math.floor(sample * candidates.length)]!;
+    const index = Math.floor(sample * candidates.length);
+    const [destination] = candidates.splice(index, 1);
+    if (!destination) {
+      throw new RangeError("Unable to find a cell for a relocated mine.");
+    }
+    relocatedPositions.add(`${destination.row}:${destination.column}`);
+  }
 
   const updatedBoard = board.map((row, rowIndex) =>
     row.map((cell, columnIndex) => {
-      if (
-        rowIndex === position.row &&
-        columnIndex === position.column
-      ) {
-        return {
-          ...cell,
-          hasMine: false,
-        };
-      }
-
-      if (
-        rowIndex === newMinePosition!.row &&
-        columnIndex === newMinePosition!.column
-      ) {
-        return {
-          ...cell,
-          hasMine: true,
-        };
-      }
-
-      return cell;
+      const key = `${rowIndex}:${columnIndex}`;
+      if (safeAreaKeys.has(key)) return { ...cell, hasMine: false };
+      return relocatedPositions.has(key) ? { ...cell, hasMine: true } : cell;
     }),
   );
 

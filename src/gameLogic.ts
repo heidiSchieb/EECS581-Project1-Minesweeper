@@ -7,7 +7,7 @@
  */
 import {
   createBoardWithMines, exposeAllMines, getCell, getNeighbors,
-  isValidPosition, makeFirstCellSafe, updateCell,
+  isValidPosition, makeFirstRevealAreaSafe, updateCell,
 } from "./boardManager.ts";
 import {
   MIN_MINES, MAX_MINES,
@@ -77,16 +77,26 @@ export function uncover(
   if (cell.visibility !== "covered") return unchanged(state);
 
   // 2. Protect first click
-  const board = state.firstRevealDone
+  let board = state.firstRevealDone
     ? state.board
-    : makeFirstCellSafe(state.board, position, random);
+    : makeFirstRevealAreaSafe(state.board, position, random);
+  let flagsPlaced = state.flagsPlaced;
+
+  if (!state.firstRevealDone) {
+    for (const safePosition of [position, ...getNeighbors(position)]) {
+      if (getCell(board, safePosition).visibility === "flagged") {
+        board = updateCell(board, safePosition, { visibility: "covered" });
+        flagsPlaced--;
+      }
+    }
+  }
 
   // 3. Check for a mine after first-reveal protection.
   if (getCell(board, position).hasMine) { //If user click on a mine
     return {
       ok: true,
       changed: true,
-      state: loseGame({ ...state, board, firstRevealDone: true }),
+      state: loseGame({ ...state, board, flagsPlaced, firstRevealDone: true }),
     };
   }
   //If click on safe cell
@@ -99,6 +109,7 @@ export function uncover(
     state: withWinStatus({
       ...state,
       board: revealedBoard,
+      flagsPlaced,
       revealedSafeCount: state.revealedSafeCount + revealedCount,
       firstRevealDone: true,
     }),
@@ -235,9 +246,10 @@ function revealSafeArea(board: Board, origin: Position): SafeAreaReveal {
   const visited = new Set<string>();
   let nextBoard = board;
   let revealedCount = 0;
+  let frontierIndex = 0;
 
-  while (frontier.length > 0) {
-    const current = frontier.shift()!;
+  while (frontierIndex < frontier.length) {
+    const current = frontier[frontierIndex++]!;
     const key = `${current.row}:${current.column}`;
     if (visited.has(key)) continue;
     visited.add(key);

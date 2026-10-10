@@ -49,7 +49,7 @@ Open the URL printed in the terminal. Press Ctrl+C to stop.
 
 ## Play
 
-Choose 10–20 mines and select **Start round**. Left-click to reveal; right-click or press F on a focused cell to toggle a flag. Reveal all safe cells to win. The first reveal is safe.
+Choose 10–20 mines and select **Start round**. Left-click to reveal; right-click or press F on a focused cell to toggle a flag. Reveal all safe cells to win. The first reveal always opens a clear area around the selected cell; any flags in that guaranteed-safe area are removed.
 
 Flags are capped at the chosen mine count. **Mines left** shows flags remaining. Unflag a cell before revealing it. **New Game** returns to setup; refreshing resets the game.
 
