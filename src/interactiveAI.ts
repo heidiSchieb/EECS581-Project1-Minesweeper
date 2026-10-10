@@ -1,26 +1,53 @@
+/**
+ * Module Name: interactiveAI.ts
+ * Description: Implements the AI decision making algorithms (Easy, Medium, and Hard)
+ * to calculate and execute automated computer moves
+ * 
+ * Inputs: GameState object representing the active game board and session status.
+ * Outputs: Updated GameState object that reflects the game state after the AI's move.
+ * 
+ * Author(s): Heidi Schieber and Lilly Tran
+ * Creation Date: September 30, 2026
+ * 
+ * External Sources / Attribution: Developed as an extension to the baseline Minesweeper codebase
+ * inherited from Project Team 19. Original project logic was developed for this assignment 
+ * and no third-party code was copied. The code integrates with Project Team 19's
+ * existing architecture and specifications. 
+ * 
+ */
+
 import {
-    createBoardWithMines, exposeAllMines, getCell, getNeighbors,
-    isValidPosition, makeFirstCellSafe, updateCell,
+    getNeighbors
   } from "./boardManager.ts";
 import {
-    MIN_MINES, MAX_MINES, BOARD_SIZE,
-    type Board, type GameState, type Position, type Cell,
+    BOARD_SIZE, type Board, type GameState, type Position
   } from "./types.ts";
 import {
     startGame, toggleFlag, uncover
 } from "./gameLogic.ts";
 
+/**
+ * Performs a basic AI move by randomly choosing coordinates until an
+ * unrevealed and unflagged cell has been found and then uncovers it
+ * 
+ * @param gameState - Current state of the Minesweeper game
+ * @returns The updated GameState after reavealing a cell or the
+ *          GameState as is if the game is already finished
+ */
 function aiSolverEasy(gameState : GameState) {
+    // only make moves if the game is still being played
     if (gameState.status !== "playing"){
         return gameState;
     }
 
+    // continuously pick a random cell until an unrevealed cell has been selected
     while(true){
         const row = Math.floor(Math.random() * BOARD_SIZE);
         const col = Math.floor(Math.random() * BOARD_SIZE);
 
         const cell = gameState.board[row]?.[col];
 
+        // if the cell is covered, uncover it and return the updated gameState
         if (cell?.visibility === "covered") {
             const result = uncover(gameState, { row, column: col });
             return result.ok ? result.state : gameState;
@@ -28,21 +55,32 @@ function aiSolverEasy(gameState : GameState) {
     }
 }
 
+/**
+ * Performs an intermediate AI move that either 
+ * 1. Flags a cell's hidden neighbors if they equal the number of remaining mines 
+ * 2. Uncovers a cell's hidden neighbors if all adjacent mines have been flagged
+ * 3. Falls back to calling aiSolverEasy() if no deterministic move can be made
+ * 
+ * @param gameState - Current state of the Minesweeper game
+ * @returns The updated GameState after applying the medium level deductions
+ *          or the GameState as is if the game is already finished
+ */
 function aiSolverMedium(gameState : GameState) {
+    // only make moves if the game is still being played
     if (gameState.status !== "playing") {
         return gameState;
     }
 
-    // check if neighbors can be flagged or safely uncovered
+    // iterate over every cell in the board to see if neighbors can be revealed
     for (let row = 0; row < BOARD_SIZE; row++){
         for (let col = 0; col < BOARD_SIZE; col++){
             const cell = gameState.board[row]![col]!;
             const pos: Position = {row: row, column: col};
 
-            // get neighbors' positions
+            // retrieve all neighbor coordinate positions
             const neighborsPositions = getNeighbors(pos);
 
-            // map the neighbors' positions back to the corresponding cell
+            // map the neighborsPositions back to the corresponding cell
             const neighbors = neighborsPositions.map(p => ({
                 pos: p,
                 cell: gameState.board[p.row]![p.column]!
@@ -51,7 +89,8 @@ function aiSolverMedium(gameState : GameState) {
             // filter for covered and flagged neighbor cells
             const covered = neighbors.filter(n => n.cell.visibility === "covered");
             const flagged = neighbors.filter(n => n.cell.visibility === "flagged");
-
+            
+            // if the cell has no hidden neigbors continue to the next iteration
             if (covered.length === 0){
                 continue;
             }
