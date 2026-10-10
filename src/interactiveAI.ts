@@ -1,10 +1,9 @@
 import {
-    createBoardWithMines, exposeAllMines, getCell, getNeighbors,
-    isValidPosition, makeFirstCellSafe, updateCell,
+    getNeighbors,
   } from "./boardManager.ts";
 import {
-    MIN_MINES, MAX_MINES, BOARD_SIZE,
-    type Board, type GameState, type Position, type Cell,
+    BOARD_SIZE,
+    type Board, type GameState, type Position,
   } from "./types.ts";
 import {
     startGame, toggleFlag, uncover
