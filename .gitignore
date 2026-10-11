@@ -1,3 +1,7 @@
+# Repository-local generated output and environment files excluded from version control.
+# Inputs: Paths matched by Git ignore patterns.
+# Outputs: Excluded build output, dependencies, logs, secrets, and local QA materials.
+# Maintainer: Project 2 team; updated 2026-10-10.
 node_modules/
 dist/
 QA/

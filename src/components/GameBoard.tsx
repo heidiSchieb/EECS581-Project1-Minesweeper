@@ -1,9 +1,11 @@
 /**
- * Module: GameBoard UI including labeled grid, cell appearance, and pointer/keyboard controls
- * Inputs: Board, disabled/detonated flags, onUncover and onFlag callbacks
- * Outputs: React grid and callback calls with selected positions
- * Author: Mariska Rai
- * Created: 2026-09-18
+ * Module: GameBoard - renders the interactive minesweeper grid and its UI state.
+ * Description: Displays the board, handles click and keyboard interactions, and emits uncover/flag callbacks.
+ * Inputs: current board state, disabled/detonated state, onUncover callback, onFlag callback.
+ * Outputs: rendered grid cells and callback calls for uncover and flag actions.
+ * External sources/attribution: OpenAI Copilot assisted with documentation updates; no third-party code copied.
+ * Authors: Alice M & Audrey F.
+ * Created: 2026-10-10
  */
 import type { KeyboardEvent, MouseEvent } from "react";
 import { BOARD_SIZE, type Board, type Cell, type Position } from "../types";

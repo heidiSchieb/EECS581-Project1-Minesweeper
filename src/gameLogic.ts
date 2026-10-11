@@ -3,7 +3,11 @@
  * Inputs: Mine count, GameState, Position, optional RandomSource
  * Outputs: ActionResult with updated/unchanged state or a validation error
  * Authors: Anh Hoang (setup/consolidation); Montaha Jornaz (flags); Rijul Poudel (uncover, flood fill, win/loss)
- * Created: 2026-09-10 
+ * Project 2 shared user/AI action integration: Lilly T & Heidi S.
+ * Project 2 automatic AI action integration: Zain C and Ibaad K.
+ * External sources: Inherited Project 1 game rules; Project 2 updates integrate local AI callers.
+ * OpenAI Copilot assisted with Project 2 integration and documentation.
+ * Created: 2026-09-10; Project 2 integration updated 2026-10-10.
  */
 import {
   createBoardWithMines, exposeAllMines, getCell, getNeighbors,
