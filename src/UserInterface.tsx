@@ -1,18 +1,22 @@
 /**
- * Module: UserInterface: owns React game state and renders the game screen
- * Inputs: Player events and ActionResult values from inputHandler
- * Outputs: Rendered screen; start, uncover, and flag requests
+ * Module: UserInterface: owns React game state, play modes, and loss feedback.
+ * Inputs: Setup choices, player events, and results from game logic and the AI solver.
+ * Outputs: Rendered game screens, alternating/automatic AI turns, and loss effects.
  * Authors: Anh Hoang (setup); Sreeja Narahari (setup/phases); Mariska Rai (arcade UI, command wiring, loading fix)
- * Created: 2026-09-10 
+ * Project 2 UI attribution: Alice M & Audrey F.
+ * Project 2 player-versus-AI attribution: Lilly T & Heidi S.
+ * Project 2 automatic-solving attribution: Zain C and Ibaad K.
+ * External sources: Inherited project modules and public/vineBoom.mp3, public/boom.png.
+ * OpenAI Copilot assisted with Project 2 integration and review; no third-party code copied.
+ * Updated: 2026-10-10
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createBoard } from "./boardManager";
 import GameBoard from "./components/GameBoard";
 import SetupControls from "./components/SetupControls";
 import { processFlagInput, processSetupInput, processUncoverInput } from "./inputHandler";
 import { BOARD_SIZE, type GameState, type Position } from "./types";
-
-import { useAutoSolver } from "./useAutoSolver";
+import { makeAiTurn, type AIDifficulty, type AIMode } from "./aiSolver";
 
 // Explosion sound effect; built once here so it is not recreated on every render.
 const boomSound = new Audio("/vineBoom.mp3");
@@ -46,26 +50,54 @@ export default function UserInterface() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [error, setError] = useState("");
   const [detonated, setDetonated] = useState<Position | null>(null);
+  const [aiMode, setAiMode] = useState<AIMode>("manual");
+  const [aiDifficulty, setAiDifficulty] = useState<AIDifficulty>("easy");
+  const [autoRunning, setAutoRunning] = useState(false);
+  const [interactiveAiPending, setInteractiveAiPending] = useState(false);
   const previewBoard = useMemo(() => createBoard(), []);
 
   const phase = phaseFromGame(gameState);
   const board = gameState?.board ?? previewBoard;
   const minesLeft = gameState ? gameState.mineCount - gameState.flagsPlaced : 0;
+  const aiIsMoving = autoRunning || interactiveAiPending;
 
-  // Connect automatic play to the current game and uncover handler.
-  const { isRunning, startAuto, stopAuto } = useAutoSolver(
-    gameState,
-    handleUncover,
-  );
+  useEffect(() => {
+    if (!gameState || gameState.status !== "playing") {
+      if (autoRunning) setAutoRunning(false);
+      if (interactiveAiPending) setInteractiveAiPending(false);
+      return;
+    }
+
+    const shouldMove =
+      (aiMode === "automatic" && autoRunning) ||
+      (aiMode === "interactive" && interactiveAiPending);
+
+    if (!shouldMove) return;
+
+    const timer = window.setTimeout(() => {
+      const result = makeAiTurn(gameState, aiDifficulty);
+      applyGameState(result.state, result.detonatedPosition);
+
+      if (aiMode === "interactive") {
+        setInteractiveAiPending(false);
+      } else if (result.state === gameState) {
+        setAutoRunning(false);
+      }
+    }, 500);
+
+    return () => window.clearTimeout(timer);
+  }, [aiDifficulty, aiMode, autoRunning, gameState, interactiveAiPending]);
 
   // --- Talk to game logic through the input handler ---
   function returnToSetup() {
+    setAutoRunning(false);
+    setInteractiveAiPending(false);
     setGameState(null);
     setDetonated(null);
     setError("");
   }
 
-  function handleStart(rawInput: string) {
+  function handleStart(rawInput: string, mode: AIMode, difficulty: AIDifficulty) {
     const result = processSetupInput(rawInput);
 
     if (!result.ok) {
@@ -73,9 +105,27 @@ export default function UserInterface() {
       return;
     }
 
+    setAiMode(mode);
+    setAiDifficulty(difficulty);
+    setAutoRunning(mode === "automatic");
+    setInteractiveAiPending(false);
     setDetonated(null);
     setGameState(result.state);
     setError("");
+  }
+
+  function applyGameState(nextState: GameState, detonatedPosition: Position | null = null) {
+    const gameWasPlaying = gameState?.status === "playing";
+    setGameState(nextState);
+
+    // Route all losses through the same feedback, regardless of who made the move.
+    if (gameWasPlaying && nextState.status === "lost") {
+      setDetonated(detonatedPosition);
+      boomSound.currentTime = 0;
+      void boomSound.play().catch((error: unknown) => {
+        console.error("Unable to play the loss sound effect.", error);
+      });
+    }
   }
 
   function handleUncover(position: Position) {
@@ -91,11 +141,9 @@ export default function UserInterface() {
     if (!result.changed) return;
 
     setError("");
-    setGameState(result.state);
-    if (result.state.status === "lost") {
-      setDetonated(position);
-      boomSound.currentTime = 0;
-      boomSound.play().catch(() => {});
+    applyGameState(result.state, result.state.status === "lost" ? position : null);
+    if (aiMode === "interactive" && result.state.status === "playing") {
+      setInteractiveAiPending(true);
     }
   }
 
@@ -112,7 +160,14 @@ export default function UserInterface() {
     if (!result.changed) return;
 
     setError("");
-    setGameState(result.state);
+    applyGameState(result.state);
+    if (aiMode === "interactive" && result.state.status === "playing") {
+      setInteractiveAiPending(true);
+    }
+  }
+
+  function toggleAutoRun() {
+    setAutoRunning((running) => !running);
   }
 
   return (
@@ -168,18 +223,31 @@ export default function UserInterface() {
               <span className="hud-label">Mine total</span>
               <span className="hud-value">{gameState?.mineCount}</span>
             </div>
+            <div className="hud-item">
+              <span className="hud-label">Mode</span>
+              <span className="hud-value hud-value--text">
+                {aiMode === "manual"
+                  ? "Player only"
+                  : aiMode === "interactive"
+                    ? interactiveAiPending
+                      ? `${aiDifficulty} AI turn`
+                      : `${aiDifficulty} / your turn`
+                    : `${aiDifficulty} automatic`}
+              </span>
+            </div>
             <button type="button" className="new-game" onClick={returnToSetup}>
               New Game
             </button>
-            {/* NEW: Start or stop automatic play. */}
-            <button
-              type="button"
-              className="new-game"
-              onClick={isRunning ? stopAuto : startAuto}
-              aria-pressed={isRunning}
-            >
-              {isRunning ? "Stop AI" : "Start Easy AI"}
-            </button>
+            {aiMode === "automatic" ? (
+              <button
+                type="button"
+                className="new-game"
+                onClick={toggleAutoRun}
+                aria-pressed={autoRunning}
+              >
+                {autoRunning ? "Stop AI" : "Resume AI"}
+              </button>
+            ) : null}
           </div>
         ) : null}
 
@@ -205,7 +273,7 @@ export default function UserInterface() {
           <div className={`board-wrap${phase === "setup" ? " is-preview" : ""}`}>
             {/* NEW: Block manual board input while the AI runs. */}
             <fieldset
-              disabled={isRunning}
+              disabled={aiIsMoving}
               aria-label="Minesweeper board controls"
               style={{
                 border: 0,
@@ -214,7 +282,7 @@ export default function UserInterface() {
                 minWidth: 0,
               }}
               onContextMenuCapture={(event) => {
-                if (isRunning) {
+                if (aiIsMoving) {
                   event.preventDefault();
                   event.stopPropagation();
                 }
@@ -222,7 +290,7 @@ export default function UserInterface() {
             >
             <GameBoard
               board={board}
-              disabled={phase !== "playing"}
+              disabled={phase !== "playing" || aiIsMoving}
               detonated={detonated}
               onUncover={handleUncover}
               onFlag={handleFlag}
