@@ -3,9 +3,9 @@
  * Description: Renders the setup form and forwards validated selections to the parent game flow.
  * Inputs: user-entered mine count, selected AI mode, selected AI difficulty, disabled state, onStart callback.
  * Outputs: form controls and callback invocation with the raw mine count plus selected mode and difficulty.
- * User-versus-AI and automatic-solving selection attribution: Lilly T & Heidi S; Zain C and Ibaad K.
+ * User-versus-AI and automatic-solving selection attribution: Lilly Tran & Heidi Schieber; Zain Cheema and Ibaad Khatib.
  * External sources/attribution: OpenAI Copilot assisted with Project 2 UI edits; no third-party code copied.
- * Authors: Alice M & Audrey F.
+ * Authors: Alica Mungamuri & Audrey Facer.
  * Created: 2026-10-10
  */
 import { useId, useState } from "react";

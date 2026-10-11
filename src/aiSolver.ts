@@ -3,8 +3,8 @@
  * Description: Implements one Easy, Medium, or Hard move on a shared Minesweeper state.
  * Inputs: GameState, AI difficulty, and an optional deterministic random source.
  * Outputs: Updated state and, for a loss, the detonated position.
- * Project 2 user-versus-AI attribution: Lilly T & Heidi S.
- * Project 2 automatic-solving attribution: Zain C and Ibaad K.
+ * Project 2 user-versus-AI attribution: Lilly Tran & Heidi Schieber.
+ * Project 2 automatic-solving attribution: Zain Cheema and Ibaad Khatib.
  * External sources: Project 2 assignment rules; OpenAI Copilot assisted with implementation
  * and tests. No third-party solver code copied.
  * Updated: 2026-10-10

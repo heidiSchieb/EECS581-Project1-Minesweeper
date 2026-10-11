@@ -1,7 +1,7 @@
 // Module: TypeScript configuration for the Node-based AI solver tests.
 // Inputs: Application compiler settings and tests/**/*.ts.
 // Outputs: Strict, no-emit test type checking with Node.js declarations.
-// Attribution: Zain C and Ibaad K (automatic solver test support).
+// Attribution: Zain Cheema and Ibaad Khatib (automatic solver test support).
 // External source: OpenAI Copilot assisted with configuration and documentation.
 {
   "extends": "./tsconfig.json",

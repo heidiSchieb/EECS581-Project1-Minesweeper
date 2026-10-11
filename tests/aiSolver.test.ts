@@ -3,8 +3,8 @@
  * Description: Verifies Easy/Medium/Hard solver decisions and loss coordinates.
  * Inputs: Deterministic board fixtures and injected random sources.
  * Outputs: Node test results; assertions verify solver state transitions.
- * Project 2 user-versus-AI attribution: Lilly T & Heidi S.
- * Project 2 automatic-solving attribution: Zain C and Ibaad K.
+ * Project 2 user-versus-AI attribution: Lilly Tran & Heidi Schieber.
+ * Project 2 automatic-solving attribution: Zain Cheema and Ibaad Khatib.
  * External sources: Node.js built-in node:test and node:assert/strict APIs;
  * OpenAI Copilot assisted with test implementation.
  * Created: 2026-10-10

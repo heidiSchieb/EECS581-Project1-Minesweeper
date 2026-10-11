@@ -4,7 +4,7 @@
  * Inputs: current board state, disabled/detonated state, onUncover callback, onFlag callback.
  * Outputs: rendered grid cells and callback calls for uncover and flag actions.
  * External sources/attribution: OpenAI Copilot assisted with documentation updates; no third-party code copied.
- * Authors: Alice M & Audrey F.
+ * Authors: Alica Mungamuri & Audrey Facer.
  * Created: 2026-10-10
  */
 import type { KeyboardEvent, MouseEvent } from "react";

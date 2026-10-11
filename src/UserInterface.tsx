@@ -3,9 +3,9 @@
  * Inputs: Setup choices, player events, and results from game logic and the AI solver.
  * Outputs: Rendered game screens, alternating/automatic AI turns, and loss effects.
  * Authors: Anh Hoang (setup); Sreeja Narahari (setup/phases); Mariska Rai (arcade UI, command wiring, loading fix)
- * Project 2 UI attribution: Alice M & Audrey F.
- * Project 2 player-versus-AI attribution: Lilly T & Heidi S.
- * Project 2 automatic-solving attribution: Zain C and Ibaad K.
+ * Project 2 UI attribution: Alica Mungamuri & Audrey Facer.
+ * Project 2 player-versus-AI attribution: Lilly Tran & Heidi Schieber.
+ * Project 2 automatic-solving attribution: Zain Cheema and Ibaad Khatib.
  * External sources: Inherited project modules and public/vineBoom.mp3, public/boom.png.
  * OpenAI Copilot assisted with Project 2 integration and review; no third-party code copied.
  * Updated: 2026-10-10
