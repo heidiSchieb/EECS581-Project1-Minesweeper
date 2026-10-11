@@ -2,9 +2,9 @@
 Document: UML sequence diagram for the Project 2 loss-effect custom feature.
 Inputs: Loss events caused by player or AI uncover actions.
 Outputs: Model of detonated-cell state, explosion sound, panel shake, and overlay.
-UI attribution: Alice M & Audrey F.
-User-versus-AI attribution: Lilly T & Heidi S.
-Automatic-solving attribution: Zain C and Ibaad K.
+UI attribution: Alica Mungamuri & Audrey Facer.
+User-versus-AI attribution: Lilly Tran & Heidi Schieber.
+Automatic-solving attribution: Zain Cheema and Ibaad Khatib.
 External sources: Current project implementation and Project 2 requirements;
 OpenAI Copilot assisted with documentation and diagram authoring.
 Created: 2026-10-10
