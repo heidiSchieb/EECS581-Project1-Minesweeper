@@ -1,3 +1,8 @@
+// Module: application TypeScript configuration.
+// Inputs: TypeScript compiler invocation and application source files.
+// Outputs: Strict browser-targeted type checking without emitted files.
+// External source: TypeScript compiler options used by the local project.
+// OpenAI Copilot assisted with documentation updates; updated 2026-10-10.
 {
   "compilerOptions": {
     "target": "ES2022",
